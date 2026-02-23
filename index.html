@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ゴブレットゴブラーズ（Web）</title>
+  <style>
+    :root{
+      --bg1:#fff3c7;
+      --bg2:#d7f8ff;
+      --ink:#222;
+      --card:#ffffffcc;
+      --shadow: 0 14px 30px rgba(0,0,0,.15);
+      --blue:#2f86ff;
+      --blueDeep:#0b4dff;
+      --orange:#ff8a2f;
+      --orangeDeep:#ff4d00;
+      --good:#2ecc71;
+      --warn:#f39c12;
+      --bad:#e74c3c;
+      --cell:#fff;
+      --grid:#222;
+      --glow: 0 0 0 4px rgba(46, 204, 113, .35), 0 10px 20px rgba(46, 204, 113, .22);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 20% 10%, var(--bg2) 0 35%, transparent 36%),
+        radial-gradient(circle at 85% 25%, var(--bg1) 0 40%, transparent 41%),
+        linear-gradient(135deg, #fff 0%, #f6ffef 40%, #fff4ff 100%);
+      font-family: "Comic Sans MS","Hiragino Maru Gothic ProN","Meiryo",system-ui,sans-serif;
+      min-height:100vh;
+      overflow-x:hidden;
+    }
+
+    header{
+      padding:18px 16px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:sticky;
+      top:0;
+      z-index:5;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,.85), rgba(255,255,255,.45));
+      border-bottom: 1px solid rgba(0,0,0,.08);
+    }
+
+    .title{
+      display:flex;
+      gap:12px;
+      align-items:center;
+    }
+    .logo{
+      width:42px;height:42px;
+      border-radius:14px;
+      background: conic-gradient(from 30deg, var(--blue), var(--orange), #ffd400, #7cff8a, var(--blue));
+      box-shadow: 0 10px 20px rgba(0,0,0,.15);
+      position:relative;
+      transform: rotate(-6deg);
+    }
+    .logo:before, .logo:after{
+      content:"";
+      position:absolute;
+      width:10px;height:10px;
+      background:#111;
+      border-radius:50%;
+      top:13px;
+      box-shadow: inset 0 -2px 0 rgba(255,255,255,.2);
+    }
+    .logo:before{ left:12px; }
+    .logo:after{ right:12px; }
+    .logo i{
+      position:absolute;
+      left:10px; right:10px; bottom:10px;
+      height:10px;
+      border-radius:0 0 12px 12px;
+      background:#111;
+      transform: rotate(2deg);
+    }
+
+    h1{
+      margin:0;
+      font-size:18px;
+      letter-spacing:.5px;
+      line-height:1.1;
+    }
+    .subtitle{
+      margin:2px 0 0;
+      font-size:12px;
+      opacity:.75;
+    }
+
+    main{
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 14px 12px 26px;
+      display:grid;
+      grid-template-columns: 1fr 380px;
+      gap:14px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      main{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid rgba(0,0,0,.08);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 14px;
+    }
+
+    .statusRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+
+    .badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(0,0,0,.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    }
+    .dot{
+      width:12px;height:12px;border-radius:50%;
+      background: #999;
+      box-shadow: inset 0 -2px 0 rgba(255,255,255,.35);
+    }
+    .dot.blue{ background: var(--blue); }
+    .dot.orange{ background: var(--orange); }
+
+    .btnRow{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    button{
+      border:0;
+      cursor:pointer;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 800;
+      background:#fff;
+      color:#111;
+      border: 1px solid rgba(0,0,0,.12);
+      box-shadow: 0 10px 22px rgba(0,0,0,.09);
+      transition: transform .08s ease, box-shadow .18s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(1px) scale(.99); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+    button.secondary{
+      background: rgba(255,255,255,.7);
+      font-weight:700;
+    }
+
+    .message{
+      margin-top:10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.7);
+      border: 1px dashed rgba(0,0,0,.18);
+      min-height: 46px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight: 700;
+    }
+    .message .icon{
+      width:24px;height:24px;border-radius:9px;
+      background: #111;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      font-size:14px;
+      flex:0 0 auto;
+      transform: rotate(-6deg);
+    }
+    .message.good .icon{ background: var(--good); }
+    .message.warn .icon{ background: var(--warn); }
+    .message.bad .icon{ background: var(--bad); }
+
+    /* Board */
+    .boardWrap{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:12px;
+    }
+
+    .board{
+      width:min(520px, 100%);
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      padding: 14px;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 20% 15%, rgba(255,255,255,.9), rgba(255,255,255,.55)),
+        linear-gradient(160deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
+      border: 2px solid rgba(0,0,0,.15);
+      box-shadow: 0 18px 40px rgba(0,0,0,.15);
+      position:relative;
+    }
+
+    .grid{
+      width:100%;
+      height:100%;
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 12px;
+      position:relative;
+    }
+
+    .cell{
+      position:relative;
+      border-radius: 18px;
+      background: var(--cell);
+      border: 2px solid rgba(0,0,0,.22);
+      box-shadow: 0 10px 24px rgba(0,0,0,.10);
+      cursor:pointer;
+      overflow:hidden;
+      display:grid;
+      place-items:center;
+      transition: transform .12s ease, box-shadow .2s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cell:hover{ transform: translateY(-2px); }
+    .cell:active{ transform: translateY(1px); }
+
+    .cell.valid{
+      box-shadow: var(--glow);
+      border-color: rgba(46, 204, 113, .65);
+      background: linear-gradient(180deg, rgba(220,255,231,.9), rgba(255,255,255,.95));
+    }
+
+    .cell.from{
+      border-color: rgba(0,0,0,.45);
+      background: linear-gradient(180deg, rgba(255,255,180,.9), rgba(255,255,255,.95));
+    }
+
+    .cell.win{
+      border-color: rgba(255, 215, 0, .95);
+      box-shadow: 0 0 0 4px rgba(255,215,0,.35), 0 14px 30px rgba(255,215,0,.22);
+      background: linear-gradient(180deg, rgba(255,250,205,.95), rgba(255,255,255,.95));
+    }
+
+    /* Hidden stack indicator */
+    .stackDots{
+      position:absolute;
+      right:10px;
+      bottom:10px;
+      display:flex;
+      gap:4px;
+      opacity:.8;
+      pointer-events:none;
+    }
+    .stackDots span{
+      width:6px;height:6px;border-radius:50%;
+      background: rgba(0,0,0,.25);
+    }
+
+    /* Piece (gobbler) */
+    .piece{
+      --pColor:#999;
+      --pDeep:#666;
+      --size: 74px;       /* default for large */
+      width: var(--size);
+      height: var(--size);
+      border-radius: 999px;
+      position: relative;
+      display:grid;
+      place-items:center;
+      box-shadow: 0 14px 30px rgba(0,0,0,.18);
+      border: 2px solid rgba(0,0,0,.22);
+      background:
+        radial-gradient(circle at 30% 25%, rgba(255,255,255,.8), transparent 42%),
+        radial-gradient(circle at 70% 65%, rgba(0,0,0,.12), transparent 55%),
+        linear-gradient(160deg, var(--pColor), var(--pDeep));
+      transform-origin: 50% 70%;
+      animation: pop .15s ease-out;
+    }
+
+    @keyframes pop{
+      from{ transform: scale(.86) rotate(-2deg); filter: saturate(1.2); }
+      to{ transform: scale(1) rotate(0deg); filter: saturate(1); }
+    }
+
+    /* sizes */
+    .piece.s1{ --size: 46px; }
+    .piece.s2{ --size: 60px; }
+    .piece.s3{ --size: 74px; }
+
+    .piece.blue{ --pColor: var(--blue); --pDeep: var(--blueDeep); }
+    .piece.orange{ --pColor: var(--orange); --pDeep: var(--orangeDeep); }
+
+    /* face */
+    .piece .eyes{
+      position:absolute;
+      top: 24%;
+      width: 72%;
+      display:flex;
+      justify-content:space-between;
+      padding: 0 10%;
+      pointer-events:none;
+    }
+    .piece .eye{
+      width: 16%;
+      aspect-ratio: 1 / 1;
+      background: #fff;
+      border-radius: 50%;
+      border: 2px solid rgba(0,0,0,.25);
+      position:relative;
+      box-shadow: inset 0 -2px 0 rgba(0,0,0,.08);
+    }
+    .piece .eye:after{
+      content:"";
+      position:absolute;
+      width: 42%;
+      height: 42%;
+      background:#111;
+      border-radius:50%;
+      top: 34%;
+      left: 34%;
+    }
+
+    .piece .mouth{
+      position:absolute;
+      bottom: 22%;
+      width: 62%;
+      height: 28%;
+      border-radius: 0 0 999px 999px;
+      background: #111;
+      box-shadow: inset 0 4px 0 rgba(255,255,255,.08);
+      transform: rotate(1deg);
+      overflow:hidden;
+      pointer-events:none;
+    }
+    .piece .teeth{
+      position:absolute;
+      top: -2px;
+      left: 10%;
+      right: 10%;
+      height: 46%;
+      display:flex;
+      justify-content:space-between;
+      opacity:.95;
+    }
+    .piece .tooth{
+      width: 10%;
+      height: 100%;
+      background: #fff;
+      border-radius: 0 0 6px 6px;
+      box-shadow: 0 2px 0 rgba(0,0,0,.12);
+    }
+
+    .piece.selected{
+      outline: 4px solid rgba(255,215,0,.9);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 6px rgba(255,215,0,.25), 0 16px 34px rgba(0,0,0,.22);
+      animation: wiggle .55s ease-in-out infinite;
+    }
+
+    @keyframes wiggle{
+      0%,100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2deg); }
+    }
+
+    /* Side panel */
+    .side{
+      display:grid;
+      gap:12px;
+    }
+
+    .tray{
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.10);
+    }
+
+    .trayHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .playerName{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      font-weight: 900;
+      font-size: 14px;
+    }
+
+    .turnTag{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      font-size: 12px;
+      border: 1px solid rgba(0,0,0,.12);
+      background: rgba(255,255,255,.85);
+      box-shadow: 0 8px 18px rgba(0,0,0,.08);
+    }
+    .turnTag.on{ background: rgba(255, 250, 205, .95); border-color: rgba(0,0,0,.18); }
+    .turnTag.off{ opacity: .55; }
+
+    .piecesRow{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+    }
+
+    .hint{
+      font-size: 12px;
+      opacity: .8;
+      margin-top: 8px;
+      line-height: 1.35;
+    }
+
+    details{
+      border-radius: 18px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(0,0,0,.10);
+      box-shadow: 0 10px 22px rgba(0,0,0,.08);
+      overflow:hidden;
+    }
+    summary{
+      cursor:pointer;
+      padding: 12px 12px;
+      font-weight: 900;
+      user-select:none;
+      list-style:none;
+    }
+    summary::-webkit-details-marker{ display:none; }
+
+    .rules{
+      padding: 0 12px 12px;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .rules ul{ margin: 8px 0 0 18px; }
+    .rules li{ margin: 4px 0; }
+
+    .footerNote{
+      font-size: 12px;
+      opacity: .72;
+      text-align:center;
+      margin-top: 8px;
+    }
+
+    /* Win overlay */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      place-items:center;
+      padding: 20px;
+      background: rgba(0,0,0,.35);
+      z-index: 20;
+    }
+    .overlay.show{ display:grid; }
+    .modal{
+      width:min(520px, 100%);
+      background: rgba(255,255,255,.92);
+      border-radius: 22px;
+      border: 1px solid rgba(0,0,0,.12);
+      box-shadow: 0 22px 60px rgba(0,0,0,.25);
+      padding: 16px;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+    .modal h2{
+      margin: 6px 0 8px;
+      font-size: 20px;
+      letter-spacing: .4px;
+    }
+    .modal p{
+      margin: 0 0 12px;
+      font-weight: 800;
+    }
+    .confetti{
+      position:absolute;
+      inset:-40px;
+      opacity:.35;
+      background:
+        radial-gradient(circle at 10% 20%, #ffd400 0 14px, transparent 15px),
+        radial-gradient(circle at 20% 80%, #7cff8a 0 14px, transparent 15px),
+        radial-gradient(circle at 85% 30%, #ff66cc 0 14px, transparent 15px),
+        radial-gradient(circle at 70% 75%, #2f86ff 0 14px, transparent 15px),
+        radial-gradient(circle at 45% 45%, #ff8a2f 0 14px, transparent 15px);
+      filter: blur(.2px);
+      transform: rotate(6deg);
+      pointer-events:none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="title">
+      <div class="logo" aria-hidden="true"><i></i></div>
+      <div>
+        <h1>ゴブレットゴブラーズ（コミカル版）</h1>
+        <div class="subtitle">3×3／食べる（被せる）ありの三目並べ</div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left: Board -->
+    <section class="panel boardWrap" aria-label="ゲーム盤">
+      <div class="statusRow">
+        <div class="badge" id="turnBadge">
+          <span class="dot" id="turnDot"></span>
+          <span id="turnText">---</span>
+        </div>
+
+        <div class="btnRow">
+          <button class="secondary" id="btnReset">新しいゲーム</button>
+          <button class="secondary" id="btnUndo" title="※公式ルールにはありません（誤操作救済）。ON/OFFできます" aria-pressed="false">
+            取り消し(任意)
+          </button>
+        </div>
+      </div>
+
+      <div class="board" role="application" aria-label="3×3盤">
+        <div class="grid" id="grid"></div>
+      </div>
+
+      <div class="message warn" id="msg">
+        <div class="icon">!</div>
+        <div id="msgText">コマを選んで置こう（上のコマより大きいと“食べられる”よ）</div>
+      </div>
+
+      <div class="footerNote">※盤面は「各マスの一番上のコマの色」で勝利判定します（下は出てくるまで“いない”扱い）。</div>
+    </section>
+
+    <!-- Right: Side -->
+    <aside class="side">
+      <div class="tray" id="trayP0" aria-label="ブルーの手持ちコマ">
+        <div class="trayHeader">
+          <div class="playerName">
+            <span class="dot blue"></span>
+            <span>ブルー</span>
+          </div>
+          <span class="turnTag" id="tagP0">待機</span>
+        </div>
+        <div class="piecesRow" id="handP0"></div>
+        <div class="hint">自分の番だけ、手持ちコマを置けます。盤上の自分コマ（最上段）を動かすこともできます。</div>
+      </div>
+
+      <div class="tray" id="trayP1" aria-label="オレンジの手持ちコマ">
+        <div class="trayHeader">
+          <div class="playerName">
+            <span class="dot orange"></span>
+            <span>オレンジ</span>
+          </div>
+          <span class="turnTag" id="tagP1">待機</span>
+        </div>
+        <div class="piecesRow" id="handP1"></div>
+        <div class="hint">相手のコマは動かせません。食べる（被せる）のはOK（小さいなら色は関係なし）。</div>
+      </div>
+
+      <details open>
+        <summary>ルール（このアプリが踏襲している内容）</summary>
+        <div class="rules">
+          <ul>
+            <li>目的：縦・横・斜めいずれかで「自分色の最上段コマ」を3つ並べたら勝ち。</li>
+            <li>手番：①手持ちから置く <b>または</b> ②盤上の自分コマ（最上段）を1つ動かす、のどちらか1回。</li>
+            <li>置ける場所：空きマス、または<b>より小さいコマの上</b>（相手でも自分でもOK）。</li>
+            <li>動かせるのは自分のコマのみ（盤上で最上段に見えているものだけ）。</li>
+            <li><b>触った（＝盤上コマを選択した）ら必ず動かす</b>：このアプリでは、盤上コマ選択中は移動完了まで他操作できません。</li>
+            <li>動かす／置く結果、下から相手の3つ並びが現れた場合、相手が勝つことがあります（このアプリでも起こります）。</li>
+          </ul>
+          <div style="margin-top:10px; font-weight:800; opacity:.85;">
+            ヒント：被せると下の色が消えるので「守り」にも「奇襲」にも使えます。下に何があるか覚えておこう！
+          </div>
+        </div>
+      </details>
+    </aside>
+  </main>
+
+  <!-- Win Modal -->
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+      <div class="confetti" aria-hidden="true"></div>
+      <h2 id="winTitle">勝利！</h2>
+      <p id="winText">---</p>
+      <div class="btnRow" style="justify-content:center;">
+        <button id="btnPlayAgain">もう一回</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // =========================
+    // Gobblet Gobblers (3x3) - Vanilla JS
+    // =========================
+
+    const LINES = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    const SIZE_LABEL = {1:"小", 2:"中", 3:"大"};
+
+    const state = {
+      currentPlayer: 0,        // 0=Blue, 1=Orange
+      board: Array.from({length:9}, () => []), // each cell = stack of pieceIds (bottom -> top)
+      pieces: new Map(),       // id -> {id, player, size, where:{type:"hand"|"board", cell?:number}}
+      selection: null,         // {type:"hand"|"board", pieceId, fromCell?}
+      lockMove: false,         // when board piece selected => must complete move
+      gameOver: false,
+      winner: null,            // 0/1
+      winLine: null,           // array of cell indices
+      allowUndo: false,
+      history: []              // snapshots (optional)
+    };
+
+    // UI refs
+    const elGrid = document.getElementById("grid");
+    const elHand0 = document.getElementById("handP0");
+    const elHand1 = document.getElementById("handP1");
+    const elTag0 = document.getElementById("tagP0");
+    const elTag1 = document.getElementById("tagP1");
+    const elTurnBadge = document.getElementById("turnBadge");
+    const elTurnDot = document.getElementById("turnDot");
+    const elTurnText = document.getElementById("turnText");
+    const elMsg = document.getElementById("msg");
+    const elMsgText = document.getElementById("msgText");
+    const elOverlay = document.getElementById("overlay");
+    const elWinText = document.getElementById("winText");
+
+    const btnReset = document.getElementById("btnReset");
+    const btnUndo = document.getElementById("btnUndo");
+    const btnPlayAgain = document.getElementById("btnPlayAgain");
+
+    // Build board cells
+    function buildBoardUI(){
+      elGrid.innerHTML = "";
+      for(let i=0;i<9;i++){
+        const cell = document.createElement("div");
+        cell.className = "cell";
+        cell.dataset.index = String(i);
+        cell.setAttribute("role","button");
+        cell.setAttribute("aria-label", `マス ${i+1}`);
+        cell.addEventListener("click", () => onCellClick(i));
+        elGrid.appendChild(cell);
+      }
+    }
+
+    // Create initial pieces:
+    // Each player: 2 each size (small=1, medium=2, large=3) => 6 pieces
+    function initGame(){
+      state.currentPlayer = 0;
+      state.board = Array.from({length:9}, () => []);
+      state.pieces = new Map();
+      state.selection = null;
+      state.lockMove = false;
+      state.gameOver = false;
+      state.winner = null;
+      state.winLine = null;
+      state.history = [];
+
+      let idCounter = 0;
+      for(let p=0;p<2;p++){
+        for(const size of [1,2,3]){
+          for(let k=0;k<2;k++){
+            const id = `P${p}-${size}-${idCounter++}`;
+            state.pieces.set(id, { id, player:p, size, where:{type:"hand"} });
+          }
+        }
+      }
+
+      saveHistoryIfEnabled(); // initial
+      renderAll();
+      setMessage("warn","コマを選んで置こう（上のコマより大きいと“食べられる”よ）");
+    }
+
+    // Snapshot for optional undo (not part of official rules)
+    function snapshot(){
+      return {
+        currentPlayer: state.currentPlayer,
+        board: state.board.map(stack => stack.slice()),
+        pieces: Array.from(state.pieces.entries()).map(([id, obj]) => [id, JSON.parse(JSON.stringify(obj))]),
+        selection: state.selection ? JSON.parse(JSON.stringify(state.selection)) : null,
+        lockMove: state.lockMove,
+        gameOver: state.gameOver,
+        winner: state.winner,
+        winLine: state.winLine ? state.winLine.slice() : null
+      };
+    }
+    function restore(snap){
+      state.currentPlayer = snap.currentPlayer;
+      state.board = snap.board.map(s => s.slice());
+      state.pieces = new Map(snap.pieces.map(([id,obj]) => [id, obj]));
+      state.selection = snap.selection;
+      state.lockMove = snap.lockMove;
+      state.gameOver = snap.gameOver;
+      state.winner = snap.winner;
+      state.winLine = snap.winLine;
+      renderAll();
+    }
+    function saveHistoryIfEnabled(){
+      if(!state.allowUndo) return;
+      state.history.push(snapshot());
+      if(state.history.length > 60) state.history.shift();
+    }
+
+    function setMessage(type, text){
+      elMsg.classList.remove("good","warn","bad");
+      elMsg.classList.add(type);
+      elMsgText.textContent = text;
+    }
+
+    function playerName(p){ return p===0 ? "ブルー" : "オレンジ"; }
+    function playerClass(p){ return p===0 ? "blue" : "orange"; }
+
+    function getTopPieceId(cellIndex){
+      const stack = state.board[cellIndex];
+      return stack.length ? stack[stack.length-1] : null;
+    }
+    function getTopPiece(cellIndex){
+      const id = getTopPieceId(cellIndex);
+      return id ? state.pieces.get(id) : null;
+    }
+
+    function handPieceIds(player){
+      const ids = [];
+      for(const [id, piece] of state.pieces.entries()){
+        if(piece.player === player && piece.where.type === "hand"){
+          ids.push(id);
+        }
+      }
+      // sort by size (big first) for nicer layout
+      ids.sort((a,b) => state.pieces.get(b).size - state.pieces.get(a).size);
+      return ids;
+    }
+
+    // Legal checks
+    function canPlacePieceOnCell(piece, cellIndex){
+      const top = getTopPiece(cellIndex);
+      if(!top) return true;                 // empty OK
+      return top.size < piece.size;         // must be strictly smaller
+    }
+
+    function legalPlaceTargets(piece){
+      const targets = [];
+      for(let i=0;i<9;i++){
+        if(canPlacePieceOnCell(piece,i)) targets.push(i);
+      }
+      return targets;
+    }
+
+    function canMovePieceToCell(piece, fromCell, toCell){
+      if(toCell === fromCell) return false;
+      const topFrom = getTopPiece(fromCell);
+      if(!topFrom) return false;
+      if(topFrom.id !== piece.id) return false;     // must be top
+      if(piece.player !== state.currentPlayer) return false; // only your piece
+      return canPlacePieceOnCell(piece, toCell);    // same rule for landing
+    }
+
+    function legalMoveTargets(piece, fromCell){
+      const targets = [];
+      for(let i=0;i<9;i++){
+        if(canMovePieceToCell(piece, fromCell, i)) targets.push(i);
+      }
+      return targets;
+    }
+
+    // Winner evaluation:
+    // IMPORTANT: after each action, first check current player,
+    // if not, check opponent. This allows "you reveal opponent line -> opponent wins".
+    function evaluateWinner(){
+      const topOwners = state.board.map((_, idx) => {
+        const top = getTopPiece(idx);
+        return top ? top.player : null;
+      });
+
+      function hasLine(player){
+        for(const line of LINES){
+          if(line.every(i => topOwners[i] === player)){
+            return line;
+          }
+        }
+        return null;
+      }
+
+      const cur = state.currentPlayer;
+      const opp = 1 - cur;
+
+      const curLine = hasLine(cur);
+      if(curLine) return { winner: cur, line: curLine };
+
+      const oppLine = hasLine(opp);
+      if(oppLine) return { winner: opp, line: oppLine };
+
+      return null;
+    }
+
+    // Rendering
+    function renderAll(){
+      renderTurn();
+      renderHands();
+      renderBoard();
+      renderHighlights();
+      renderWinOverlay();
+    }
+
+    function renderTurn(){
+      elTurnText.textContent = `手番：${playerName(state.currentPlayer)}`;
+      elTurnDot.className = "dot " + playerClass(state.currentPlayer);
+
+      const on0 = state.currentPlayer === 0;
+      elTag0.textContent = on0 ? "あなたの番" : "待機";
+      elTag1.textContent = !on0 ? "あなたの番" : "待機";
+      elTag0.classList.toggle("on", on0);
+      elTag0.classList.toggle("off", !on0);
+      elTag1.classList.toggle("on", !on0);
+      elTag1.classList.toggle("off", on0);
+
+      // disable UI trays visually (handled in click too)
+      document.getElementById("trayP0").style.opacity = on0 ? "1" : ".72";
+      document.getElementById("trayP1").style.opacity = !on0 ? "1" : ".72";
+    }
+
+    function makePieceElement(piece, {clickable=false}={}){
+      const d = document.createElement("div");
+      d.className = `piece s${piece.size} ${playerClass(piece.player)}`;
+      d.dataset.pieceId = piece.id;
+      d.setAttribute("aria-label", `${playerName(piece.player)} ${SIZE_LABEL[piece.size]}コマ`);
+      d.title = `${playerName(piece.player)} ${SIZE_LABEL[piece.size]}（サイズ${piece.size}）`;
+
+      // face parts
+      const eyes = document.createElement("div");
+      eyes.className = "eyes";
+      const e1 = document.createElement("div"); e1.className = "eye";
+      const e2 = document.createElement("div"); e2.className = "eye";
+      eyes.appendChild(e1); eyes.appendChild(e2);
+
+      const mouth = document.createElement("div");
+      mouth.className = "mouth";
+      const teeth = document.createElement("div");
+      teeth.className = "teeth";
+      for(let i=0;i<6;i++){
+        const t = document.createElement("div");
+        t.className = "tooth";
+        teeth.appendChild(t);
+      }
+      mouth.appendChild(teeth);
+
+      d.appendChild(eyes);
+      d.appendChild(mouth);
+
+      // selected highlight
+      if(state.selection && state.selection.pieceId === piece.id){
+        d.classList.add("selected");
+      }
+
+      if(clickable){
+        d.style.cursor = "pointer";
+        d.addEventListener("click", (ev) => {
+          ev.stopPropagation();
+          onHandPieceClick(piece.id);
+        });
+      }else{
+        d.style.pointerEvents = "none";
+      }
+      return d;
+    }
+
+    function renderHands(){
+      // Blue
+      elHand0.innerHTML = "";
+      for(const id of handPieceIds(0)){
+        const piece = state.pieces.get(id);
+        elHand0.appendChild(makePieceElement(piece, {clickable:true}));
+      }
+      // Orange
+      elHand1.innerHTML = "";
+      for(const id of handPieceIds(1)){
+        const piece = state.pieces.get(id);
+        elHand1.appendChild(makePieceElement(piece, {clickable:true}));
+      }
+
+      // If board-piece move is locked, dim hands
+      const dim = state.lockMove && !state.gameOver;
+      elHand0.style.opacity = dim ? ".55" : "1";
+      elHand1.style.opacity = dim ? ".55" : "1";
+    }
+
+    function renderBoard(){
+      // clear win mark
+      const cells = Array.from(elGrid.children);
+      for(let i=0;i<9;i++){
+        const cell = cells[i];
+        cell.classList.remove("valid","from","win");
+        cell.innerHTML = "";
+
+        const top = getTopPiece(i);
+        if(top){
+          // show top piece
+          const pe = makePieceElement(top, {clickable:false});
+          // allow selecting own top piece by clicking cell (handled in onCellClick)
+          cell.appendChild(pe);
+
+          // stack dots for hidden pieces
+          const hiddenCount = state.board[i].length - 1;
+          if(hiddenCount > 0){
+            const dots = document.createElement("div");
+            dots.className = "stackDots";
+            const n = Math.min(hiddenCount, 5);
+            for(let k=0;k<n;k++){
+              const s = document.createElement("span");
+              dots.appendChild(s);
+            }
+            cell.appendChild(dots);
+          }
+        }
+      }
+
+      // Apply win highlight
+      if(state.winLine){
+        for(const idx of state.winLine){
+          cells[idx].classList.add("win");
+        }
+      }
+    }
+
+    function renderHighlights(){
+      const cells = Array.from(elGrid.children);
+      // remove
+      for(const cell of cells){
+        cell.classList.remove("valid","from");
+      }
+      if(state.gameOver) return;
+
+      if(!state.selection) return;
+
+      if(state.selection.type === "hand"){
+        const piece = state.pieces.get(state.selection.pieceId);
+        for(const i of legalPlaceTargets(piece)){
+          cells[i].classList.add("valid");
+        }
+      }else if(state.selection.type === "board"){
+        const piece = state.pieces.get(state.selection.pieceId);
+        const from = state.selection.fromCell;
+        cells[from].classList.add("from");
+        for(const i of legalMoveTargets(piece, from)){
+          cells[i].classList.add("valid");
+        }
+      }
+    }
+
+    function renderWinOverlay(){
+      if(state.gameOver && state.winner !== null){
+        elWinText.textContent = `🎉 ${playerName(state.winner)} の勝ち！ もぐもぐ！`;
+        elOverlay.classList.add("show");
+        elOverlay.setAttribute("aria-hidden","false");
+      }else{
+        elOverlay.classList.remove("show");
+        elOverlay.setAttribute("aria-hidden","true");
+      }
+    }
+
+    // Interactions
+    function onHandPieceClick(pieceId){
+      if(state.gameOver) return;
+
+      // If a board piece was "touched" (selected), must move it first.
+      if(state.lockMove){
+        setMessage("warn","そのコマを動かすまで他は触れません！（“触ったら必ず動かす”）");
+        return;
+      }
+
+      const piece = state.pieces.get(pieceId);
+      if(piece.where.type !== "hand"){
+        setMessage("warn","そのコマは手持ちにありません。");
+        return;
+      }
+      if(piece.player !== state.currentPlayer){
+        setMessage("warn","今の手番の色のコマだけ選べます。");
+        return;
+      }
+
+      // toggle selection
+      if(state.selection && state.selection.type === "hand" && state.selection.pieceId === pieceId){
+        state.selection = null;
+        setMessage("warn","選択を解除しました。コマを選んで置こう。");
+      }else{
+        state.selection = { type:"hand", pieceId };
+        const targets = legalPlaceTargets(piece);
+        setMessage("good", `手持ちの「${SIZE_LABEL[piece.size]}」を選択中。置けるマスが光っています。`);
+        if(targets.length === 0){
+          setMessage("bad","置ける場所がありません（通常は起きにくいです）。");
+        }
+      }
+      renderAll();
+    }
+
+    function onCellClick(cellIndex){
+      if(state.gameOver) return;
+
+      // if no selection: try selecting a board piece (move)
+      if(!state.selection){
+        const top = getTopPiece(cellIndex);
+        if(!top){
+          setMessage("warn","空きマスです。手持ちのコマを選んで置いてね。");
+          return;
+        }
+        if(top.player !== state.currentPlayer){
+          setMessage("warn","相手のコマは動かせません。手持ちを置くか、自分の盤上コマを選んで動かそう。");
+          return;
+        }
+
+        // only top piece can be moved (already top)
+        const targets = legalMoveTargets(top, cellIndex);
+        if(targets.length === 0){
+          setMessage("warn","そのコマは今動けません（移動先がありません）。別の手を考えよう。");
+          return;
+        }
+
+        // Select => lock (must move)
+        state.selection = { type:"board", pieceId: top.id, fromCell: cellIndex };
+        state.lockMove = true;
+        setMessage("good","盤上コマを触りました！移動先を選んで必ず動かしてください（取消不可）。");
+        renderAll();
+        return;
+      }
+
+      // If selection exists
+      if(state.selection.type === "hand"){
+        const piece = state.pieces.get(state.selection.pieceId);
+        if(!canPlacePieceOnCell(piece, cellIndex)){
+          setMessage("bad","そこには置けません。上のコマより“大きい”ときだけ食べられます。");
+          return;
+        }
+
+        // place
+        saveHistoryIfEnabled();
+        placePiece(piece.id, cellIndex);
+        state.selection = null;
+        afterAction();
+        return;
+      }
+
+      if(state.selection.type === "board"){
+        const piece = state.pieces.get(state.selection.pieceId);
+        const from = state.selection.fromCell;
+
+        if(!canMovePieceToCell(piece, from, cellIndex)){
+          setMessage("bad","そこには移動できません。光っているマス（空き or 小さいコマの上）を選んでね。");
+          return;
+        }
+
+        // move (must do)
+        saveHistoryIfEnabled();
+        movePiece(piece.id, from, cellIndex);
+        state.selection = null;
+        state.lockMove = false;
+        afterAction();
+        return;
+      }
+    }
+
+    function placePiece(pieceId, cellIndex){
+      const piece = state.pieces.get(pieceId);
+      // remove from hand
+      piece.where = { type:"board", cell: cellIndex };
+      state.board[cellIndex].push(pieceId);
+
+      const top = getTopPiece(cellIndex);
+      // top is placed piece now
+      setMessage("good", `${playerName(piece.player)}が「${SIZE_LABEL[piece.size]}」を置いた！もぐもぐ！`);
+    }
+
+    function movePiece(pieceId, fromCell, toCell){
+      // pop from fromCell
+      const stackFrom = state.board[fromCell];
+      const popped = stackFrom.pop();
+      if(popped !== pieceId){
+        // safety (shouldn't happen)
+        // put it back if mismatch
+        if(popped) stackFrom.push(popped);
+        setMessage("bad","エラー：そのコマは動かせませんでした。");
+        return;
+      }
+
+      // push to target
+      state.board[toCell].push(pieceId);
+      const piece = state.pieces.get(pieceId);
+      piece.where = { type:"board", cell: toCell };
+
+      setMessage("good", `${playerName(piece.player)}が盤上の「${SIZE_LABEL[piece.size]}」を移動！`);
+    }
+
+    function afterAction(){
+      // Check win (current first, then opponent)
+      const res = evaluateWinner();
+      if(res){
+        state.gameOver = true;
+        state.winner = res.winner;
+        state.winLine = res.line;
+        state.lockMove = false;
+        state.selection = null;
+        renderAll();
+        return;
+      }
+
+      // Next turn
+      state.currentPlayer = 1 - state.currentPlayer;
+      renderAll();
+      setMessage("warn", `次は ${playerName(state.currentPlayer)} の番。手持ちを置くか、盤上の自分コマを動かそう。`);
+    }
+
+    // Optional undo (NOT official rule)
+    function undo(){
+      if(!state.allowUndo){
+        setMessage("warn","取り消しはOFFです（公式ルール外）。ボタンでONにできます。");
+        return;
+      }
+      if(state.lockMove){
+        setMessage("warn","盤上コマを触った後は、移動が完了するまで取り消しできません（“触ったら必ず動かす”）。");
+        return;
+      }
+      if(state.history.length <= 1){
+        setMessage("warn","取り消せる履歴がありません。");
+        return;
+      }
+      // drop current state and go back
+      state.history.pop();
+      const prev = state.history[state.history.length - 1];
+      restore(prev);
+      setMessage("good","1手取り消しました（任意機能）。");
+    }
+
+    // Buttons
+    btnReset.addEventListener("click", () => {
+      initGame();
+    });
+
+    btnPlayAgain.addEventListener("click", () => {
+      elOverlay.classList.remove("show");
+      initGame();
+    });
+
+    btnUndo.addEventListener("click", () => {
+      // toggle allowUndo
+      state.allowUndo = !state.allowUndo;
+      btnUndo.setAttribute("aria-pressed", String(state.allowUndo));
+      btnUndo.textContent = state.allowUndo ? "取り消し(任意)：ON" : "取り消し(任意)";
+      if(state.allowUndo){
+        state.history = [snapshot()];
+        setMessage("warn","取り消しON（※公式ルール外）。誤操作救済としてだけ使ってね。");
+      }else{
+        state.history = [];
+        setMessage("warn","取り消しOFF（より原作っぽい）。");
+      }
+    });
+
+    // init
+    buildBoardUI();
+    initGame();
+  </script>
+</body>
+</html>
