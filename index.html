@@ -2,9 +2,9 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <title>ゴブレットゴブラーズ（Web）</title>
-  <style> 
+  <style>
     :root{
       --bg1:#fff3c7;
       --bg2:#d7f8ff;
@@ -21,6 +21,14 @@
       --cell:#fff;
       --grid:#222;
       --glow: 0 0 0 4px rgba(46, 204, 113, .35), 0 10px 20px rgba(46, 204, 113, .22);
+
+      /* piece sizes (desktop default) */
+      --ps1: 46px;
+      --ps2: 60px;
+      --ps3: 74px;
+
+      /* mobile bottom dock height (estimate) */
+      --dock-h: 188px;
     }
 
     *{ box-sizing:border-box; }
@@ -282,7 +290,7 @@
     .piece{
       --pColor:#999;
       --pDeep:#666;
-      --size: 74px;       /* default for large */
+      --size: var(--ps3); /* default for large */
       width: var(--size);
       height: var(--size);
       border-radius: 999px;
@@ -304,10 +312,10 @@
       to{ transform: scale(1) rotate(0deg); filter: saturate(1); }
     }
 
-    /* sizes */
-    .piece.s1{ --size: 46px; }
-    .piece.s2{ --size: 60px; }
-    .piece.s3{ --size: 74px; }
+    /* sizes (use vars) */
+    .piece.s1{ --size: var(--ps1); }
+    .piece.s2{ --size: var(--ps2); }
+    .piece.s3{ --size: var(--ps3); }
 
     .piece.blue{ --pColor: var(--blue); --pDeep: var(--blueDeep); }
     .piece.orange{ --pColor: var(--orange); --pDeep: var(--orangeDeep); }
@@ -513,6 +521,113 @@
       filter: blur(.2px);
       transform: rotate(6deg);
       pointer-events:none;
+    }
+
+    /* =========================
+       Mobile layout (<= 640px)
+       - 手持ちを下部固定ドックにして、盤面操作を常に1画面で
+    ========================= */
+    @media (max-width: 640px){
+      header{
+        padding: 12px 12px 8px;
+      }
+      .logo{ width:36px; height:36px; border-radius:12px; }
+      h1{ font-size:16px; }
+      .subtitle{ font-size:11px; }
+
+      main{
+        display:block; /* 1カラム固定 */
+        padding: 10px 10px calc(var(--dock-h) + env(safe-area-inset-bottom) + 16px);
+        gap: 10px;
+      }
+
+      .panel{
+        padding: 10px;
+        border-radius: 16px;
+      }
+
+      .statusRow{
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+      .badge{
+        justify-content: center;
+      }
+      .btnRow{
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .btnRow button{
+        flex: 1 1 0;
+        padding: 10px 10px;
+      }
+
+      .board{
+        width: 100%;
+        padding: 10px;
+        border-radius: 18px;
+      }
+      .grid{ gap: 8px; }
+      .cell{
+        border-radius: 14px;
+        box-shadow: 0 8px 18px rgba(0,0,0,.10);
+        touch-action: manipulation;
+      }
+
+      /* コマを盤面サイズに合わせて可変（スマホで少し小さめ） */
+      :root{
+        --ps1: clamp(30px, 9vw, 40px);
+        --ps2: clamp(38px, 12vw, 52px);
+        --ps3: clamp(46px, 15vw, 64px);
+      }
+
+      /* ===== 下部ドック（手持ち） ===== */
+      .side{
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        z-index: 9;
+
+        padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+        background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.92));
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(0,0,0,.10);
+        box-shadow: 0 -16px 30px rgba(0,0,0,.12);
+
+        display: grid;
+        grid-template-columns: 1fr 1fr; /* ブルー/オレンジを横並び */
+        gap: 10px;
+      }
+
+      .tray{
+        padding: 10px;
+        border-radius: 16px;
+        background: rgba(255,255,255,.82);
+      }
+      .trayHeader{ margin-bottom: 6px; }
+      .playerName{ font-size: 13px; }
+      .turnTag{ font-size: 11px; padding: 5px 8px; }
+
+      /* 手持ちは折り返さず横スクロール（ドック高さ固定） */
+      .piecesRow{
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px;
+        padding-bottom: 2px;
+        scrollbar-width: none;
+      }
+      .piecesRow::-webkit-scrollbar{ display:none; }
+
+      /* 説明文はスマホでは隠してスッキリ */
+      .hint{ display:none; }
+
+      /* ルールはドック内で全幅 */
+      details{
+        grid-column: 1 / -1;
+        max-height: 55vh;
+        overflow: auto;
+      }
     }
   </style>
 </head>
@@ -1092,8 +1207,6 @@
       piece.where = { type:"board", cell: cellIndex };
       state.board[cellIndex].push(pieceId);
 
-      const top = getTopPiece(cellIndex);
-      // top is placed piece now
       setMessage("good", `${playerName(piece.player)}が「${SIZE_LABEL[piece.size]}」を置いた！もぐもぐ！`);
     }
 
@@ -1102,8 +1215,6 @@
       const stackFrom = state.board[fromCell];
       const popped = stackFrom.pop();
       if(popped !== pieceId){
-        // safety (shouldn't happen)
-        // put it back if mismatch
         if(popped) stackFrom.push(popped);
         setMessage("bad","エラー：そのコマは動かせませんでした。");
         return;
@@ -1180,6 +1291,13 @@
         setMessage("warn","取り消しOFF（より原作っぽい）。");
       }
     });
+
+    // スマホではルールをデフォルトで閉じる（下部ドック圧迫を回避）
+    (() => {
+      const d = document.querySelector("aside.side details");
+      if (!d) return;
+      if (window.matchMedia("(max-width: 640px)").matches) d.removeAttribute("open");
+    })();
 
     // init
     buildBoardUI();
